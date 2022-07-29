@@ -34,6 +34,13 @@ _metric_name,_defauft_labels,_port = parameters(sys.argv[1:])
 print("name: %s, labels: %s, port: %s" % (_metric_name,_defauft_labels,_port))
 app = Flask(__name__)
 
+def render_output(_response):
+    if re.match("(Mozilla|AppleWebKit|Chrome|Safari)", str(request.headers.get('User-Agent'))):
+        _output='<br>'.join(_response) + '<br>'
+    else:
+        _output='\n'.join(_response) + '\n'
+    return _output
+
 @app.route('/', methods=['GET'])
 def home():
     return "try:\n /metrics\n /payload?foo1=bar1&foo2=bar2\n"
@@ -74,13 +81,10 @@ def payload():
     print("Request:",request)
 
     # return response  
-    _result=""
-    if re.match("(Mozilla|AppleWebKit|Chrome|Safari)", str(request.headers.get('User-Agent'))):
-        _result='ok' + '<br>' + str(request) + '<br>' + str(request.headers.get('User-Agent')) + "<br>"    
-    else:
-        _result="\nok" + '\n' + str(request) + '\n' + str(request.headers.get('User-Agent')) + "\n"
-
-    return _result 
+    _result=["ok",str(request),str(request.headers.get('User-Agent'))]
+    _response=render_output(_result)
+    
+    return _response
 
 @app.route('/metrics', methods=['GET'])
 def metrics():
@@ -98,13 +102,9 @@ def metrics():
     print("Request:",request)
 
     # join metrics
-    _result=""
-    if re.match("(Mozilla|AppleWebKit|Chrome|Safari)", str(request.headers.get('User-Agent'))):
-        _result="<br>".join(_metrics) + '<br>'
-    else:
-        _result="\n".join(_metrics) + '\n'
+    _response=render_output(_metrics)
     
-    return _result
+    return _response
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=_port)
