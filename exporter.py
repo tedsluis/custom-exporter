@@ -1,7 +1,6 @@
-from urllib import request
+from urllib import response
 from flask import Flask, request
-from re import search
-from datetime import datetime
+import re
 import getopt, sys
 
 
@@ -69,8 +68,19 @@ def payload():
         _metric_value[_labels]=1
         pass
     
+    # logging
     print("%s{%s} %s" % (_metric_name,_labels,_metric_value[_labels]))
-    return "ok\n" 
+    print("Headers:\n",request.headers)
+    print("Request:",request)
+
+    # return response  
+    _result=""
+    if re.match("(Mozilla|AppleWebKit|Chrome|Safari)", str(request.headers.get('User-Agent'))):
+        _result='ok' + '<br>' + str(request) + '<br>' + str(request.headers.get('User-Agent')) + "<br>"    
+    else:
+        _result="\nok" + '\n' + str(request) + '\n' + str(request.headers.get('User-Agent')) + "\n"
+
+    return _result 
 
 @app.route('/metrics', methods=['GET'])
 def metrics():
@@ -84,7 +94,17 @@ def metrics():
     for _labels in _metric_value:
         _metrics.append(_metric_name + '{' + _labels + '} ' + str(_metric_value[_labels]) )
 
-    return "\n".join(_metrics) + '\n'
+    print("Headers:\n",request.headers)
+    print("Request:",request)
+
+    # join metrics
+    _result=""
+    if re.match("(Mozilla|AppleWebKit|Chrome|Safari)", str(request.headers.get('User-Agent'))):
+        _result="<br>".join(_metrics) + '<br>'
+    else:
+        _result="\n".join(_metrics) + '\n'
+    
+    return _result
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=_port)
