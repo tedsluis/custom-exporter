@@ -34,7 +34,7 @@ _metric_name,_defauft_labels,_port = parameters(sys.argv[1:])
 print("name: %s, labels: %s, port: %s" % (_metric_name,_defauft_labels,_port))
 app = Flask(__name__)
 
-def render_output(_response):
+def render_newlines(_response):
     if re.match("(Mozilla|AppleWebKit|Chrome|Safari)", str(request.headers.get('User-Agent'))):
         _output='<br>'.join(_response) + '<br>'
     else:
@@ -82,7 +82,7 @@ def payload():
 
     # return response  
     _result=["ok",str(request),str(request.headers.get('User-Agent'))]
-    _response=render_output(_result)
+    _response=render_newlines(_result)
     
     return _response
 
@@ -102,7 +102,7 @@ def metrics():
     print("Request:",request)
 
     # join metrics
-    _response=render_output(_metrics)
+    _response=render_newlines(_metrics)
     
     return _response
 
