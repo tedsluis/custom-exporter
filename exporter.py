@@ -2,6 +2,7 @@ from urllib import response
 from flask import Flask, request
 import re
 import getopt, sys
+import prettytable
 
 
 def parameters(argv):
@@ -40,6 +41,48 @@ def render_newlines(_response):
     else:
         _output='\n'.join(_response) + '\n'
     return _output
+
+def create_table(_data):
+    if re.match("(Mozilla|AppleWebKit|Chrome|Safari)", str(request.headers.get('User-Agent'))):
+        _data=create_html_table(_data)
+    else:
+        _data=create_text_table(_data)
+    return _data
+
+def create_html_table(_data):
+    table = "<table>\n"
+
+    # Create the table's column headers
+    header = _data[0].split(",")
+    table += "  <tr>\n"
+    for column in header:
+        table += "    <th>{0}</th>\n".format(column.strip())
+    table += "  </tr>\n"
+
+    # Create the table's row _data
+    for line in _data[1:]:
+        row = line.split(",")
+        table += "  <tr>\n"
+        for column in row:
+            table += "    <td>{0}</td>\n".format(column.strip())
+        table += "  </tr>\n"
+
+    table += "</table>"
+    return table
+
+def create_text_table(_data):
+    table = ""
+
+    # Create the table's column headers
+    header = _data[0].split(",")
+    table += "  {0}\n".format(header.strip())
+
+    # Create the table's row _data
+    for line in _data[1:]:
+        row = line.split(",")
+        table += "  {0}\n".format(row.strip())
+
+    return table
 
 @app.route('/', methods=['GET'])
 def home():
